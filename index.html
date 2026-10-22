@@ -13,7 +13,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 20px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-h1{margin:0;font-size:20px}h2{margin:0 0 8px;font-size:14px}h2.sec{font-size:16px;margin:22px 0 10px}
+h1{margin:0;font-size:30px;line-height:1.15}h2{margin:0 0 8px;font-size:14px}h2.sec{font-size:16px;margin:22px 0 10px}
 .ups{display:flex;gap:14px;flex-wrap:wrap}.ups div{display:flex;flex-direction:column;gap:3px;max-width:290px}
 small,.note{color:var(--mut);font-size:12px}
 .btn,.ghost{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:9px 14px;font:600 13px system-ui,sans-serif;cursor:pointer;text-align:center}
@@ -49,7 +49,7 @@ a{color:var(--acc)}
 .trk i{font-style:normal;position:relative;z-index:1}
 .trk b{position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--acc);opacity:.85;transition:left .2s}
 .sw input:checked+.trk b{left:36px}.sw input:focus-visible+.trk{outline:2px solid var(--acc)}
-footer{text-align:center;color:var(--mut);font-size:13px;padding:18px 20px 26px;border-top:1px solid var(--line);margin-top:8px}
+footer{color:var(--mut);font-size:13px;padding:18px 20px calc(26px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);margin-top:8px}.fi{max-width:1320px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}@media(max-width:620px){.fi{justify-content:center;text-align:center}}
 header{position:relative}
 .sw{position:absolute;top:14px;right:20px;z-index:2}
 .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
@@ -59,13 +59,9 @@ header{position:relative}
 tbody tr:nth-child(even){background:var(--zb)}
 tbody tr:hover{background:rgba(76,110,245,.14)}
 /* tip widget */
-.tpw{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:50;display:flex;align-items:center;gap:6px;visibility:hidden;opacity:0;transform:translateY(170%);pointer-events:none}
-.tpw.show{visibility:visible;opacity:1;pointer-events:auto;animation:tpin .85s cubic-bezier(.2,.9,.3,1.1) both}
-@keyframes tpin{0%{transform:translateY(170%);opacity:0}55%{transform:translateY(-14px);opacity:1}78%{transform:translateY(5px)}100%{transform:translateY(0);opacity:1}}
 @keyframes tpwig{0%,60%,100%{transform:rotate(0)}70%{transform:rotate(-14deg)}80%{transform:rotate(12deg)}90%{transform:rotate(-6deg)}}
-.tpb{display:flex;align-items:center;gap:10px;border:0;cursor:pointer;padding:10px 18px 10px 12px;border-radius:999px;background:linear-gradient(135deg,#ffb020,#ff7a18);color:#2b1500;box-shadow:0 10px 28px rgba(255,122,24,.38),0 2px 6px rgba(0,0,0,.2);font:inherit;text-align:left;transition:transform .15s}
-.tpb:hover{transform:translateY(-2px)}.tpe{font-size:24px;line-height:1;animation:tpwig 3s ease-in-out infinite}
-.tpt b{display:block;font-size:13px}.tpt small{color:#4a2a00;font-size:12px}
+.tpl{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;padding:9px 16px 9px 12px;border-radius:999px;background:linear-gradient(135deg,#ffb020,#ff7a18);color:#2b1500;font:600 13px system-ui,sans-serif;box-shadow:0 6px 18px rgba(255,122,24,.32);transition:transform .15s}
+.tpl:hover{transform:translateY(-2px)}.tpe{display:inline-block;font-size:20px;line-height:1;transform-origin:50% 80%;animation:tpwig 3s ease-in-out infinite}
 .tpx{flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--mut);cursor:pointer;font-size:17px;line-height:1;padding:0}
 .tpo{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,12,26,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
 .tpo.on{opacity:1;visibility:visible}
@@ -105,6 +101,7 @@ tbody tr:hover{background:rgba(76,110,245,.14)}
         <label class="f">View<select id="tview"><option>Month</option><option>Quarter</option><option value="FY">Financial year</option></select></label>
         <label class="f">Period<select id="tper"></select></label>
         <label class="f">Report date<input type="date" id="rdate"></label>
+        <label class="f" id="t_brw" style="display:none">Branch<select id="t_br"></select></label>
         <label class="f chk"><input type="checkbox" id="hide" checked> Hide empty rows</label>
       </div></div>
     <p class="note" id="tsub"></p>
@@ -176,7 +173,7 @@ tbody tr:hover{background:rgba(76,110,245,.14)}
   </section>
 
   <section class="card sect" id="sm" style="--c:#fab005">
-    <h2 class="st">SMC (Exchange)</h2>
+    <div class="top"><h2 class="st" style="margin:0">SMC (Exchange)</h2><div><label class="btn alt">⬆ Upload SMC sheet<input id="xfile" type="file" accept=".xlsx,.xls,.csv" hidden></label> <small id="sm_st"></small></div></div>
     <div class="tc" id="sm_c"></div>
     <p class="note" id="sm_sub"></p>
     <div id="sm_k" class="kpis"></div>
@@ -186,6 +183,7 @@ tbody tr:hover{background:rgba(76,110,245,.14)}
       <div><h2>By category</h2><div class="cv"><canvas id="c_sm3"></canvas></div></div>
       <div><h2>By amount band</h2><div class="cv"><canvas id="c_sm4"></canvas></div></div>
       <div><h2>By brand</h2><div class="cv"><canvas id="c_sm5"></canvas></div></div>
+      <div class="wide"><h2>Profit and store incentive by staff</h2><div class="cv"><canvas id="c_sm6"></canvas></div></div>
       <div><h2>Period summary</h2><div class="tw"><table id="sm_t"></table></div></div>
       <div><h2>Staff summary</h2><div class="tw"><table id="sm_s"></table></div></div>
     </div>
@@ -211,11 +209,7 @@ tbody tr:hover{background:rgba(76,110,245,.14)}
 
   <p class="note">Upload the full workbook (.xlsx) or a CSV: the “dumb” sheet is picked automatically for sales and the “Target” sheet for targets; the sales upload also reads the “smcdumb” (exchange) and “myGcare” (service) sheets when they are in the workbook. Targets are saved in this browser, so they need uploading only once. Sales data is not saved; upload it each visit. Everything is processed in your browser. Year, quarter and month come from the Date column.</p>
 </main>
-<footer>© 2026 · Crafted with passion in Kerala by <a href="https://abduramshad.github.io/armk/" target="_blank" rel="noopener">abduRamshad</a> 😊</footer>
-<div class="tpw" id="tpw" aria-hidden="true">
-  <button class="tpb" id="tpb" type="button" aria-label="Buy me a coffee"><span class="tpe">☕</span><span class="tpt"><b>Enjoying this dashboard?</b><small>Buy me a coffee</small></span></button>
-  <button class="tpx" id="tpx" type="button" aria-label="Dismiss">×</button>
-</div>
+<footer><div class="fi"><div>© 2026 · Crafted with passion by <a href="https://abduramshad.github.io/armk/" target="_blank" rel="noopener">abduRamshad</a> 😊</div><button class="tpl" id="tpb" type="button" aria-haspopup="dialog"><span class="tpe">☕</span><span>Loving this dashboard? <b>Buy me a coffee</b></span></button></div></footer>
 <div class="tpo" id="tpo" aria-hidden="true">
   <div class="tpm" role="dialog" aria-modal="true" aria-labelledby="tpm_t">
     <button class="tpx tpc" id="tpc" type="button" aria-label="Close">×</button>
@@ -283,7 +277,7 @@ function runSegs(rs){
 const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const QN=['JFM','AMJ','JAS','OND'];
 const COL=['#4c6ef5','#12b886','#f59f00','#e64980','#7950f2','#15aabf','#fd7e14','#82c91e','#868e96','#fa5252'];
-const FL=[['year','Year'],['quarter','Quarter'],['month','Month'],['category','Category'],['staff','Staff'],['product','Product'],['brand','Brand'],['itemcat','Item category']];
+const FL0=[['year','Year'],['quarter','Quarter'],['month','Month'],['category','Category'],['staff','Staff'],['product','Product'],['brand','Brand'],['itemcat','Item category']];let FL=FL0;
 const KEY=['Mobile','Laptop','Accessories','CE','Air Conditioner','Tv','Refrigerators','Washing Machines','Tablet','GDOT'];
 let rows=[],src='',ch={},T=null,P=[];
 try{T=JSON.parse(localStorage.getItem('sd_target'))}catch(e){}
@@ -327,14 +321,14 @@ const tv=(k,h)=>{if(!T||h==null)return null;const j=T.hdr.findIndex(x=>norm(x)==
 
 // ---- sales ----
 function loadSales(a,label,xs,noSave){
- const h=a[0].map(norm),I={},K={date:'date',inv:'invoice number',B:'category',staff:'staff',G:'product',H:'brand',J:'item category',K:'item group',disc:'discount',qty:'quantity',amt:'amount',Q:'mop'};
+ const h=a[0].map(norm),I={},K={date:'date',inv:'invoice number',B:'category',staff:'staff',G:'product',H:'brand',J:'item category',K:'item group',disc:'discount',qty:'quantity',amt:'amount',Q:'mop',br:'branch'};
  for(const k in K)I[k]=h.indexOf(K[k]);
  if(I.date<0||I.amt<0){alert('Could not find the “Date” and “Amount” columns. Please upload the file/sheet named “dumb”.');return}
  const out=[];
  a.slice(1).forEach(r=>{
   const g=k=>I[k]<0?'':String(r[I[k]]==null?'':r[I[k]]).replace(/\s+/g,' ').trim(),n=k=>parseFloat(g(k).replace(/,/g,''))||0,d=pd(r[I.date]);
   if(!d)return;const mi=d.getMonth();
-  out.push({d,ds:iso(d),year:''+d.getFullYear(),mi,month:MN[mi],quarter:QN[mi/3|0]+(''+d.getFullYear()).slice(2),
+  out.push({d,ds:iso(d),year:''+d.getFullYear(),mi,month:MN[mi],quarter:QN[mi/3|0]+(''+d.getFullYear()).slice(2),branch:tc(g('br'))||'',
    category:g('B')||'—',staff:g('staff')||'—',product:g('G')||'—',brand:g('H')||'—',itemcat:g('J')||'—',inv:g('inv'),
    disc:n('disc'),qty:n('qty'),amt:n('amt'),B:norm(g('B')),G:norm(g('G')),H:norm(g('H')),J:norm(g('J')),K:norm(g('K')),Q:n('Q')})});
  if(!out.length){alert('No dated rows were found in that sheet.');return}
@@ -342,6 +336,8 @@ function loadSales(a,label,xs,noSave){
  $('st_s').textContent=out.length.toLocaleString('en-IN')+' rows · '+out[0].ds+' to '+out[out.length-1].ds+' · '+label+(SMC.length?' · '+SMC.length+' exchange rows':'');
  if(xs&&xs[1])loadMG(xs[1],1,noSave);
  if(!noSave)idbPut('dumb',{a:[a[0],...a.slice(1).filter(r=>pd(r[I.date]))],label});
+ HASBR=out.some(r=>r.branch);FL=HASBR?[...FL0,['branch','Branch']]:FL0;$('t_brw').style.display=HASBR?'':'none';if(HASBR){$('t_br').innerHTML=O(brOpts());$('t_br').onchange=renderTgt}
+ head();
  buildFilters();buildPer();initSec();renderAll()}
 
 function buildFilters(){
@@ -371,15 +367,15 @@ function renderTgt(){
  if(!rows.length){tb.innerHTML='<tr><td>Upload the sales data (dumb sheet) to see target vs achievement.</td></tr>';$('tk').innerHTML='';$('tsub').textContent='';return}
  const view=$('tview').value,p=P[+$('tper').value];if(!p)return;
  const R=pd($('rdate').value)||new Date(),day=864e5,N=Math.round((p.e-p.s)/day)+1,el=Math.min(N,Math.max(0,Math.round((R-p.s)/day))),bal=N-el;
- const A=runSegs(rows.filter(r=>r.d>=p.s&&r.d<=p.e)),ix={};SEG.forEach((s,i)=>ix[s[0]]=i);
- if(MG.length){const g=MG.filter(r=>r.d>=p.s&&r.d<=p.e);A[SIX['MyG Care']]=[g.reduce((x,r)=>x+r.bnp,0),g.reduce((x,r)=>x+r.jobs,0),g.reduce((x,r)=>x+r.disc,0)]}
+ const bsel=HASBR?$('t_br').value:'All',A=runSegs(rows.filter(r=>r.d>=p.s&&r.d<=p.e&&(bsel=='All'||r.branch==bsel))),ix={};SEG.forEach((s,i)=>ix[s[0]]=i);
+ if(MG.length){const g=MG.filter(r=>r.d>=p.s&&r.d<=p.e&&(bsel=='All'||!r.br||tc(r.br)==bsel));A[SIX['MyG Care']]=[g.reduce((x,r)=>x+r.bnp,0),g.reduce((x,r)=>x+r.jobs,0),g.reduce((x,r)=>x+r.disc,0)]}
  const qd=(()=>{const s=new Date(p.s.getFullYear(),(p.s.getMonth()/3|0)*3,1);return Math.round((new Date(s.getFullYear(),s.getMonth()+3,0)-s)/day)+1})();
  const L=SEG.map((s,i)=>{const a=A[i],k=norm(s[2]||s[0]);let t=tv(k,p.h),est=false;
   if(t==null&&view=='Month'){const q=tv(k,p.q);if(q!=null){t=q*N/qd;est=true}}
   const amt=a?a[0]:null,btd=t!=null&&amt!=null?t-amt:null,crr=amt!=null&&el>0?amt/el:null,tr=crr!=null?crr*N:null;
   return{n:s[0],t,est,amt,qty:a?a[1]:null,disc:a?a[2]:null,pc:t&&amt!=null?amt/t*100:null,btd,drr:btd!=null&&bal>0?Math.max(btd,0)/bal:null,crr,tr,tp:t&&tr!=null?tr/t*100:null}});
  const o=L[0];
- $('tsub').textContent=`${p.l} · ${el} days elapsed · ${bal} balance of ${N} days · report date ${iso(R)}`+(T?'':' · upload the targets to see target figures');
+ $('tsub').textContent=`${p.l} · ${el} days elapsed · ${bal} balance of ${N} days · report date ${iso(R)}`+(T?'':' · upload the targets to see target figures')+(bsel!='All'?' · branch: '+bsel+' (the Target sheet is not split by branch)':'');
  $('tk').innerHTML=[['Target',o.t==null?'—':(o.est?'≈ ':'')+inr(o.t)],['Achievement',inr(o.amt)],['Ach %',pct(o.pc)],['BTD',o.btd==null?'—':inr(o.btd)],['DRR / day',o.drr==null?'—':inr(o.drr)],['CRR / day',o.crr==null?'—':inr(o.crr)],['Trend',o.tr==null?'—':inr(o.tr)],['Trend %',pct(o.tp)],['Qty sold',fmt(o.qty)],['ASP',o.qty?inr(o.amt/o.qty):'—'],['Discount',inr(o.disc)],['Discount %',o.amt?pct(o.disc/o.amt*100):'—']]
   .map(([l,v])=>`<div class="kpi"><span>${l}</span><b>${v}</b></div>`).join('');
  const hide=$('hide').checked;
@@ -424,7 +420,7 @@ function renderGen(){
  bar('c_staff','staff',10,1);bar('c_brand','brand',10,4);bar('c_prod','product',10,3);bar('c_icat','itemcat',12,5)}
 // ---- monthly and quarterly analysis (date filters ignored) ----
 function bottom(){
- const ks=[['staff','ma_staff'],['category','ma_cat'],['product','ma_prod'],['brand','ma_brand'],['itemcat','ma_ic']],flt=ks.some(([k,id])=>$(id).value!='All'),R=pd($('rdate').value)||new Date(),
+ const ks=[['staff','ma_staff'],['category','ma_cat'],['product','ma_prod'],['brand','ma_brand'],['itemcat','ma_ic'],...(HASBR?[['branch','ma_br']]:[])],flt=ks.some(([k,id])=>$(id).value!='All'),R=pd($('rdate').value)||new Date(),
   d=rows.filter(r=>ks.every(([k,id])=>$(id).value=='All'||r[k]==$(id).value));
  $('ma_n').textContent=flt?'Filters applied: the overall target is hidden because targets are not set per staff, product or brand.':'All sales (no filters) compared with the overall target.';
  const grp=(kf,lab,end,th)=>{const m=new Map();d.forEach(r=>{const k=kf(r),o=m.get(k)||{k,l:lab(r),s:0,q:0,e:end(r),t:th(r)};o.s+=r.amt;o.q+=r.qty;m.set(k,o)});
@@ -453,6 +449,8 @@ const DT=(b,L)=>`<label class="f">From<input type="date" id="${b}_a" value="${is
 function rng(b,pid){const v=$(b+'_v').value;$(pid).disabled=v=='Date'||v=='All';$(b+'_a').disabled=$(b+'_b').disabled=v!='Date';
  if(v=='Date'){const a=pd($(b+'_a').value),e=pd($(b+'_b').value);return a&&e&&e>=a?{l:iso(a)+(iso(a)==iso(e)?'':' to '+iso(e)),s:a,e}:null}return gp(b,pid)}
 const uniq=k=>['All',...[...new Set(rows.map(r=>r[k]))].sort()];
+const brOpts=()=>['All',...[...new Set(rows.map(r=>r.branch).filter(Boolean))].sort()],BF=id=>HASBR?S(id,'Branch',brOpts()):'',brOK=(r,id)=>!HASBR||!$(id)||$(id).value=='All'||r.branch==$(id).value,
+ mgBr=()=>{const b=[...new Set(MG.map(r=>tc(r.br)).filter(Boolean))].sort();return b.length>1||HASBR?S('mg_br','Branch',['All',...b]):''};
 const mval=n=>document.querySelector(`input[name=${n}]:checked`).value;
 const gp=(b,id)=>PL[b][+$(id).value];
 function fillP(b,pids,offs,rg){
@@ -462,24 +460,24 @@ function fillP(b,pids,offs,rg){
 function wire(box,b,pids,offs,cb,rg){$(box).querySelectorAll('select,input').forEach(e=>e.onchange=()=>{if(b&&e.id==b+'_v')fillP(b,pids,offs,rg);cb()})}
 const PAIRS=[['Mobile','Mobile','Accessories','Accessories'],['Mobile','Mobile','GDOT','GDOT care'],['Mobile','Mobile','Mobile Antivirus','Mobile antivirus'],['Mobile','Mobile','Glamshield','Glamshield'],['Mobile','Mobile','@SMC','Exchange (SMC)'],
  ['Laptop','Laptop','Printer','Printer'],['Laptop','Laptop','Laptop Antivirus','Laptop antivirus (Total Security)'],['Laptop','Laptop','IT Accessories','IT accessories'],
- ['Consumer Electronics','CE','OSG Warranty','OSG warranty'],['TV','Tv','Home theatre','Home theatre'],['Air Conditioner','Air Conditioner','AC- STABILIZER','AC stabilizer'],['Refrigerator','Refrigerators','REF- STABILIZER','Ref stabilizer']];
-const smcOf=(s,e,stf)=>{const t=[0,0,0],f=stf&&stf!='All'?norm(stf):null;SMC.forEach(r=>{if(r.d>=s&&r.d<=e&&r.c=='de'&&(!f||r.st==f)){t[0]+=r.v;t[1]++}});return t};
+ ['Consumer Electronics','CE','OSG Warranty','OSG warranty'],['TV','Tv','Home theatre','Home theatre'],['TV','Tv','TV- STABILIZER','TV stabilizer'],['Air Conditioner','Air Conditioner','AC- STABILIZER','AC stabilizer'],['Refrigerator','Refrigerators','REF- STABILIZER','Ref stabilizer']];
+const smcOf=(s,e,stf,br)=>{const t=[0,0,0],f=stf&&stf!='All'?norm(stf):null;SMC.forEach(r=>{if(r.d>=s&&r.d<=e&&r.c=='de'&&(!f||r.st==f)&&(!br||br=='All'||r.brn==br)){t[0]+=r.v;t[1]++}});return t};
 const pairVals=(A,b,a,smc)=>{const g=n=>n=='@SMC'?smc:A[SIX[n]],x=g(b),y=g(a);return{b:{v:x[0],q:x[1]},a:{v:y[0],q:y[1]}}};
 const gcl=x=>x==null?'':x>=0?'pos':'neg',garr=x=>x==null?'—':(x>=0?'▲ ':'▼ ')+Math.abs(x).toFixed(1)+'%',gg=(a,b)=>a?(b-a)/a*100:null;
 
 function initSec(){
  const L=rows[rows.length-1].d,F=new Date(L.getFullYear(),L.getMonth(),1);
- $('ma_c').innerHTML=S('ma_staff','Staff',uniq('staff'))+S('ma_cat','Category',uniq('category'))+S('ma_prod','Product',uniq('product'))+S('ma_brand','Brand',uniq('brand'))+S('ma_ic','Item category',uniq('itemcat'));wire('ma_c',null,[],[],bottom);
- $('gr_c').innerHTML=PKH('gv')+S('g1_p','Period 1 (base)',[])+S('g2_p','Period 2 (compare)',[])+S('g_cat','Category',uniq('category'))+S('g_prod','Product',uniq('product'))+S('g_brand','Brand',uniq('brand'))+S('g_staff','Staff',uniq('staff'))+
+ $('ma_c').innerHTML=S('ma_staff','Staff',uniq('staff'))+S('ma_cat','Category',uniq('category'))+S('ma_prod','Product',uniq('product'))+S('ma_brand','Brand',uniq('brand'))+S('ma_ic','Item category',uniq('itemcat'))+BF('ma_br');wire('ma_c',null,[],[],bottom);
+ $('gr_c').innerHTML=PKH('gv')+S('g1_p','Period 1 (base)',[])+S('g2_p','Period 2 (compare)',[])+S('g_cat','Category',uniq('category'))+S('g_prod','Product',uniq('product'))+S('g_brand','Brand',uniq('brand'))+S('g_staff','Staff',uniq('staff'))+BF('g_br')+
   S('g_by','Break down by',[['category','Category'],['product','Product'],['brand','Brand'],['itemcat','Item category'],['staff','Staff']])+'<label class="f chk"><input type="checkbox" id="g_same" checked> Compare till same date</label>';
  $('g_by').value='product';fillP('gv',['g1_p','g2_p'],[-1,0]);wire('gr_c','gv',['g1_p','g2_p'],[-1,0],renderGr);
  const pv=[...rows.reduce((m,r)=>m.set(r.product,(m.get(r.product)||0)+r.amt),new Map())].sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
- $('bs_c').innerHTML=PKH('bs',1,1)+S('bs_p','Period',[])+DT('bs',L)+S('bs_prod','Product',pv)+S('bs_staff','Staff',uniq('staff'))+RV('bsm');
+ $('bs_c').innerHTML=PKH('bs',1,1)+S('bs_p','Period',[])+DT('bs',L)+S('bs_prod','Product',pv)+S('bs_staff','Staff',uniq('staff'))+BF('bs_br')+RV('bsm');
  $('bs_prod').value=pv.find(x=>norm(x)=='mobile')||pv[0];fillP('bs',['bs_p'],[0]);wire('bs_c','bs',['bs_p'],[0],renderBs);
- $('at_c').innerHTML=PKH('at',1,1)+S('at_p','Period',[])+DT('at',L)+S('at_prod','Product',['All',...new Set(PAIRS.map(p=>p[0]))])+S('at_staff','Staff',uniq('staff'))+RV('atm');
+ $('at_c').innerHTML=PKH('at',1,1)+S('at_p','Period',[])+DT('at',L)+S('at_prod','Product',['All',...new Set(PAIRS.map(p=>p[0]))])+S('at_staff','Staff',uniq('staff'))+BF('at_br')+RV('atm');
  fillP('at',['at_p'],[0]);wire('at_c','at',['at_p'],[0],renderAt);
  $('dy_c').innerHTML=`<label class="f">Start date<input type="date" id="dy_s" value="${iso(F)}"></label><label class="f">End date<input type="date" id="dy_e" value="${iso(L)}"></label>`+
-  S('dy_staff','Staff',uniq('staff'))+S('dy_cat','Category',uniq('category'))+S('dy_prod','Product',uniq('product'))+S('dy_brand','Brand',uniq('brand'))+S('dy_ic','Item category',uniq('itemcat'))+RV('dym');
+  S('dy_staff','Staff',uniq('staff'))+BF('dy_br')+S('dy_cat','Category',uniq('category'))+S('dy_prod','Product',uniq('product'))+S('dy_brand','Brand',uniq('brand'))+S('dy_ic','Item category',uniq('itemcat'))+RV('dym');
  wire('dy_c',null,[],[],renderDy)}
 
 // ---- growth / degrowth ----
@@ -488,7 +486,7 @@ function renderGr(){
  const R=pd($('rdate').value)||new Date(),lastD=rows[rows.length-1].d,R2=new Date(Math.min(R,new Date(lastD.getFullYear(),lastD.getMonth(),lastD.getDate()+1))),day=864e5;
  const nd=p=>Math.round((p.e-p.s)/day)+1,el=p=>Math.min(nd(p),Math.max(0,Math.round((R2-p.s)/day)));
  let n=0;if($('g_same').checked&&(el(p1)<nd(p1)||el(p2)<nd(p2)))n=Math.min(el(p1),el(p2));
- const win=p=>[p.s,n>0?new Date(p.s.getFullYear(),p.s.getMonth(),p.s.getDate()+n-1):p.e],f=[['category','g_cat'],['product','g_prod'],['brand','g_brand'],['staff','g_staff']],by=$('g_by').value;
+ const win=p=>[p.s,n>0?new Date(p.s.getFullYear(),p.s.getMonth(),p.s.getDate()+n-1):p.e],f=[['category','g_cat'],['product','g_prod'],['brand','g_brand'],['staff','g_staff'],...(HASBR?[['branch','g_br']]:[])],by=$('g_by').value;
  const ag=[p1,p2].map(p=>{const[a,b]=win(p),m=new Map();rows.forEach(r=>{if(r.d>=a&&r.d<=b&&f.every(([k,id])=>$(id).value=='All'||r[k]==$(id).value)){const o=m.get(r[by])||{v:0,q:0,x:0};o.v+=r.amt;o.q+=r.qty;o.x+=r.disc;m.set(r[by],o)}});return m});
  const t=ag.map(m=>[...m.values()].reduce((s,o)=>({v:s.v+o.v,q:s.q+o.q,x:s.x+o.x}),{v:0,q:0,x:0})),asp=o=>o.q?o.v/o.q:0;
  $('gr_k').innerHTML=[['Sales',t[0].v,t[1].v,inr],['Qty',t[0].q,t[1].q,fmt],['ASP',asp(t[0]),asp(t[1]),inr],['Discount',t[0].x,t[1].x,inr]].map(([l,a,b,fm])=>{const x=gg(a,b);
@@ -506,7 +504,7 @@ function renderGr(){
 // ---- brand share ----
 function renderBs(){
  const p=rng('bs','bs_p');if(!p)return;const prod=$('bs_prod').value,sf=$('bs_staff').value,m=mval('bsm'),mp=new Map();
- rows.forEach(r=>{if(r.d>=p.s&&r.d<=p.e&&r.product==prod&&(sf=='All'||r.staff==sf)){const o=mp.get(r.brand)||{k:r.brand,v:0,q:0};o.v+=r.amt;o.q+=r.qty;mp.set(r.brand,o)}});
+ rows.forEach(r=>{if(r.d>=p.s&&r.d<=p.e&&r.product==prod&&(sf=='All'||r.staff==sf)&&brOK(r,'bs_br')){const o=mp.get(r.brand)||{k:r.brand,v:0,q:0};o.v+=r.amt;o.q+=r.qty;mp.set(r.brand,o)}});
  const L=[...mp.values()].sort((x,y)=>y[m]-x[m]),TV=L.reduce((s,o)=>s+o.v,0),TQ=L.reduce((s,o)=>s+o.q,0),sv=o=>TV?o.v/TV*100:0,sq=o=>TQ?o.q/TQ*100:0,sh=m=='v'?sv:sq,top=L.slice(0,12);
  theme();mk('c_bs',{type:'bar',data:{labels:top.map(o=>o.k),datasets:[{label:'Share of '+(m=='v'?'value':'qty'),data:top.map(sh),v:top.map(o=>o.v),q:top.map(o=>o.q),backgroundColor:COL[4],borderRadius:4}]},
   options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+pct(c.parsed.x)}}},scales:{x:{ticks:{callback:v=>v+'%'}}}}});
@@ -516,7 +514,7 @@ function renderBs(){
 
 // ---- attachment share ----
 function renderAt(){
- const p=rng('at','at_p');if(!p)return;const m=mval('atm'),prod=$('at_prod').value,sf=$('at_staff').value,A=runSegs(rows.filter(r=>r.d>=p.s&&r.d<=p.e&&(sf=='All'||r.staff==sf))),smc=smcOf(p.s,p.e,sf),w=m=='v'?'value':'qty';
+ const p=rng('at','at_p');if(!p)return;const m=mval('atm'),prod=$('at_prod').value,sf=$('at_staff').value,A=runSegs(rows.filter(r=>r.d>=p.s&&r.d<=p.e&&(sf=='All'||r.staff==sf)&&brOK(r,'at_br'))),smc=smcOf(p.s,p.e,sf,HASBR?$('at_br').value:'All'),w=m=='v'?'value':'qty';
  const L=PAIRS.filter(x=>prod=='All'||x[0]==prod).map(x=>{const o=pairVals(A,x[1],x[2],smc),b=o.b[m],a=o.a[m];return{n:x[0]+' → '+x[3],b:o.b,a:o.a,pc:b?a/b*100:null,sp:a+b?a/(a+b)*100:null}});
  $('at_n').textContent=`${p.l} · Attach % = attach ${w} ÷ base ${w}. Split = base : attach share of their combined ${w}.`+(SMC.length?'':' Exchange (SMC) needs the smcdumb sheet: upload the full workbook.');
  theme();mk('c_at',{type:'bar',data:{labels:L.map(o=>o.n),datasets:[{label:'Base '+w,data:L.map(o=>o.b[m]),v:L.map(o=>o.b.v),q:L.map(o=>o.b.q),backgroundColor:COL[8],borderRadius:3,yAxisID:'y'},
@@ -529,11 +527,11 @@ function renderAt(){
 // ---- daily sale report ----
 function renderDy(){
  const s=pd($('dy_s').value),e=pd($('dy_e').value);if(!s||!e||e<s)return;
- const ks=[['staff','dy_staff'],['category','dy_cat'],['product','dy_prod'],['brand','dy_brand'],['itemcat','dy_ic']],m=mval('dym');
+ const ks=[['staff','dy_staff'],...(HASBR?[['branch','dy_br']]:[]),['category','dy_cat'],['product','dy_prod'],['brand','dy_brand'],['itemcat','dy_ic']],nb=HASBR?2:1,m=mval('dym');
  const ok=(r,n)=>ks.slice(0,n).every(([k,id])=>$(id).value=='All'||r[k]==$(id).value),prev=new Date(s.getFullYear(),s.getMonth(),s.getDate()-1),D=new Map(),W=new Map();
  rows.forEach(r=>{if(r.d<prev||r.d>e)return;
-  if(ok(r,5)){const o=D.get(r.ds)||{k:r.ds,d:r.d,v:0,q:0,x:0};o.v+=r.amt;o.q+=r.qty;o.x+=r.disc;D.set(r.ds,o)}
-  if(ok(r,1)){const a=W.get(r.ds)||[];a.push(r);W.set(r.ds,a)}});
+  if(ok(r,ks.length)){const o=D.get(r.ds)||{k:r.ds,d:r.d,v:0,q:0,x:0};o.v+=r.amt;o.q+=r.qty;o.x+=r.disc;D.set(r.ds,o)}
+  if(ok(r,nb)){const a=W.get(r.ds)||[];a.push(r);W.set(r.ds,a)}});
  const pk=d=>iso(new Date(d.getFullYear(),d.getMonth(),d.getDate()-1));
  const days=[...D.values()].filter(o=>o.d>=s).sort((a,b)=>a.k<b.k?-1:1).map(o=>{const q=D.get(pk(o.d));return Object.assign(o,{gv:q?gg(q.v,o.v):null,gq:q?gg(q.q,o.q):null})});
  const tv_=days.reduce((a,o)=>a+o.v,0),tq=days.reduce((a,o)=>a+o.q,0),best=days.reduce((b,o)=>!b||o.v>b.v?o:b,null);
@@ -544,7 +542,7 @@ function renderDy(){
  theme();mk('c_dy',{type:'bar',data:{labels:days.map(o=>o.k.slice(5)),datasets:[VQ(days,{label:'Sales (₹)',backgroundColor:COL[0],borderRadius:3,yAxisID:'y'}),
   {type:'line',label:'Qty',data:days.map(o=>o.q),v:days.map(o=>o.v),q:days.map(o=>o.q),noTip:1,borderColor:COL[2],backgroundColor:COL[2],tension:.2,yAxisID:'y1'}]},
   options:{scales:{y:{ticks:{callback:cmp}},y1:{position:'right',grid:{drawOnChartArea:false}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.datasetIndex?fmt(c.parsed.y):inr(c.parsed.y))}}}}});
- const stf=$('dy_staff').value,AD=days.map(o=>{const A=runSegs(W.get(o.k)||[]),sm=smcOf(o.d,o.d,stf);
+ const stf=$('dy_staff').value,AD=days.map(o=>{const A=runSegs(W.get(o.k)||[]),sm=smcOf(o.d,o.d,stf,HASBR?$('dy_br').value:'All');
   return{o,r:PAIRS.map(x=>{const t=pairVals(A,x[1],x[2],sm),b=t.b[m],a=t.a[m];return b>0&&a>0?{pc:a/b*100,a,b}:null})}});
  const cols=PAIRS.map((x,i)=>AD.some(d=>d.r[i])?i:-1).filter(i=>i>=0),RA=AD.filter(d=>cols.some(i=>d.r[i])),f2=v=>m=='v'?fmt(v):fmt(v);
  $('dy_a').innerHTML=cols.length?'<thead><tr><th>Date</th>'+cols.map(i=>`<th>${esc(PAIRS[i][1]=='CE'?'CE':PAIRS[i][0])} → ${esc(PAIRS[i][3])}</th>`).join('')+'</tr></thead><tbody>'+
@@ -563,25 +561,25 @@ function loadMG(a,quiet,noSave){
 function initMg(){
  const rg=[MG[0].d,MG[MG.length-1].d];
  $('mg_c').innerHTML=S('mg_v','View',[['Month','Month'],['Quarter','Quarter'],['FY','Financial year'],['All','All data'],['Date','Date / range']])+S('mg_p','Period',[])+
-  `<label class="f">From<input type="date" id="mg_a" value="${iso(rg[1])}"></label><label class="f">To<input type="date" id="mg_b" value="${iso(rg[1])}"></label>`+S('mg_am','AM',['All',...[...new Set(MG.map(r=>r.am))].sort()]);
+  `<label class="f">From<input type="date" id="mg_a" value="${iso(rg[1])}"></label><label class="f">To<input type="date" id="mg_b" value="${iso(rg[1])}"></label>`+S('mg_am','AM',['All',...[...new Set(MG.map(r=>r.am))].sort()])+mgBr();
  fillP('mg',['mg_p'],[0],rg);wire('mg_c','mg',['mg_p'],[0],renderMg,rg)}
 function renderMg(){
  const K=$('mg_k');
  if(!MG.length){K.innerHTML='<div class="note">Upload the workbook that has the myGcare sheet, or use “Upload myG Care sheet”, to see the service data.</div>';$('mg_t').innerHTML='';$('mg_sub').textContent='';$('mg_tk').innerHTML='';$('mg_tn').textContent='';return}
- const v=$('mg_v').value,am=$('mg_am').value;let a,b,lab;
+ const v=$('mg_v').value,am=$('mg_am').value,mbr=$('mg_br')?$('mg_br').value:'All';let a,b,lab;
  if(v=='Date'){a=pd($('mg_a').value);b=pd($('mg_b').value);if(!a||!b||b<a)return;lab=iso(a)+(iso(a)==iso(b)?'':' to '+iso(b))}else{const p=gp('mg','mg_p');a=p.s;b=p.e;lab=p.l}
  $('mg_p').disabled=v=='Date'||v=='All';$('mg_a').disabled=$('mg_b').disabled=v!='Date';
- const F=['jobs','tv','sp','sc','spn','jnp','ex','bnp','disc'],d=MG.filter(r=>r.d>=a&&r.d<=b&&(am=='All'||r.am==am)),t={};F.forEach(k=>t[k]=d.reduce((s,r)=>s+r[k],0));
+ const F=['jobs','tv','sp','sc','spn','jnp','ex','bnp','disc'],d=MG.filter(r=>r.d>=a&&r.d<=b&&(am=='All'||r.am==am)&&(mbr=='All'||tc(r.br)==mbr)),t={};F.forEach(k=>t[k]=d.reduce((s,r)=>s+r[k],0));
  const hi=[['Job Count',fmt(t.jobs)],['Branch Net Profit',inr(t.bnp)],['Discount',inr(t.disc)],['Service Expense',inr(t.ex)]],
   lo=[['Total Value',inr(t.tv)],['Avg value / job',t.jobs?inr(t.tv/t.jobs):'—'],['Spare Sold Price',inr(t.sp)],['Service Charge',inr(t.sc)],['Spare Net Profit',inr(t.spn)],['Job Net Profit',inr(t.jnp)],['Branch profit %',t.tv?pct(t.bnp/t.tv*100):'—'],['Profit / job',t.jobs?inr(t.bnp/t.jobs):'—']];
  K.innerHTML=hi.map(([l,x])=>`<div class="kpi hi"><span>${l}</span><b>${x}</b></div>`).join('')+lo.map(([l,x])=>`<div class="kpi"><span>${l}</span><b style="font-size:16px">${x}</b></div>`).join('');
  $('mg_sub').textContent=`${lab} · ${d.length} days with data`+(am=='All'?'':' · AM: '+am);
  const pp=v=='Date'||v=='All'?null:gp('mg','mg_p');
- if(pp&&am=='All'){const c=tcalc('MyG Care',pp,v,t.bnp);
+ if(pp&&am=='All'&&mbr=='All'){const c=tcalc('MyG Care',pp,v,t.bnp);
   $('mg_tn').textContent=`${pp.l} · ${c.el} days elapsed · ${c.bal} balance of ${c.N} days`+(c.est?' · target ≈ estimated from the quarter target':'')+(c.t==null?' · no target in the Target sheet for this period':'');
   $('mg_tk').innerHTML=[['Target',c.t==null?'—':(c.est?'≈ ':'')+inr(c.t)],['Achievement',inr(t.bnp)],['Ach %',pct(c.pc)],['BTD',c.btd==null?'—':inr(c.btd)],['DRR / day',c.drr==null?'—':inr(c.drr)],['CRR / day',c.crr==null?'—':inr(c.crr)],['Trend',c.tr==null?'—':inr(c.tr)],['Trend %',pct(c.tp)]]
    .map(([l,x])=>`<div class="kpi"><span>${l}</span><b>${x}</b></div>`).join('')}
- else{$('mg_tn').textContent='Select Month, Quarter or Financial year (with AM = All) to compare with the target.';$('mg_tk').innerHTML=''}
+ else{$('mg_tn').textContent='Select Month, Quarter or Financial year (with AM and Branch = All) to compare with the target.';$('mg_tk').innerHTML=''}
  const multi=new Set(d.map(r=>r.year+r.mi)).size>1,G=new Map();
  d.forEach(r=>{const k=multi?r.ds.slice(0,7):r.ds,o=G.get(k)||Object.assign({k},...F.map(f=>({[f]:0})));F.forEach(f=>o[f]+=r[f]);G.set(k,o)});
  const L=[...G.values()].sort((x,y)=>x.k<y.k?-1:1),lb=k=>multi?MN[+k.slice(5)-1].slice(0,3)+' '+k.slice(2,4):(+k.slice(8))+' '+MN[+k.slice(5,7)-1].slice(0,3);
@@ -600,9 +598,11 @@ function renderMg(){
 const idb=(mode,fn)=>new Promise(res=>{try{const o=indexedDB.open('sd',1);o.onupgradeneeded=()=>o.result.createObjectStore('s');o.onerror=()=>res();
  o.onsuccess=()=>{const db=o.result,t=db.transaction('s',mode),r=fn(t.objectStore('s'));t.oncomplete=()=>{res(r&&r.result);db.close()};t.onerror=t.onabort=()=>res()}}catch(e){res()}});
 const idbPut=(k,v)=>idb('readwrite',s=>s.put(v,k)),idbGet=k=>idb('readonly',s=>s.get(k)),idbDel=k=>idb('readwrite',s=>s.delete(k));
-let BR='';
+let BR='',HASBR=false;
 const tc=s=>s&&s==s.toUpperCase()?s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()):s;
-function setBranch(n){BR=tc(n);$('h1').textContent='Sales Dashboard · myG '+BR;document.title='Sales Dashboard · myG '+BR}
+function head(){const n=HASBR?(()=>{const b=[...new Set(rows.map(r=>r.branch).filter(Boolean))];return b.length==1?b[0]:''})():BR;
+ $('h1').textContent='Sales Dashboard · myG'+(n?' '+n:'');document.title=$('h1').textContent}
+function setBranch(n){BR=tc(n);head()}
 function redraw(){if(rows.length)renderAll();else{renderMg();renderSmc()}}
 function setTheme(dk,save){document.documentElement.setAttribute('data-theme',dk?'dark':'light');$('tg').checked=dk;if(save)try{localStorage.setItem('sd_theme',dk?'dark':'light')}catch(e){}redraw()}
 
@@ -616,40 +616,43 @@ function tcalc(nm,p,view,amt){
 
 // ---- SMC (exchange) ----
 function loadSMC(sm,noSave){
- const h=sm[0].map(norm),ix=n=>h.indexOf(n),I={d:ix('in date'),v:ix('amount'),s:ix('staff'),c:ix('category'),b:ix('brand'),i:ix('item_name'),br:ix('branch')},out=[],bc={};
- if(I.d<0||I.v<0)return;
- sm.slice(1).forEach(r=>{const d=pd(r[I.d]);if(!d)return;const g=k=>I[k]<0?'':String(r[I[k]]==null?'':r[I[k]]).replace(/\s+/g,' ').trim(),br=g('br');if(br)bc[br]=(bc[br]||0)+1;
-  out.push({d,ds:iso(d),year:''+d.getFullYear(),mi:d.getMonth(),v:parseFloat(g('v').replace(/,/g,''))||0,st:norm(g('s')),staff:tc(g('s'))||'—',c:norm(g('c')),cat:g('c').toUpperCase()||'—',brand:tc(g('b'))||'—',item:g('i')})});
- if(!out.length)return;
+ const h=sm[0].map(norm),ix=n=>h.indexOf(n),I={d:ix('in date')>=0?ix('in date'):ix('date'),v:ix('amount'),s:ix('staff'),c:ix('category'),b:ix('brand'),i:ix('item_name'),br:ix('branch'),vp:ix('vendor price'),pf:ix('profit'),si:ix('store incentive')},out=[],bc={};
+ if(I.d<0||I.v<0)return false;
+ sm.slice(1).forEach(r=>{const d=pd(r[I.d]);if(!d)return;const g=k=>I[k]<0?'':String(r[I[k]]==null?'':r[I[k]]).replace(/\s+/g,' ').trim(),nm=k=>parseFloat(g(k).replace(/,/g,''))||0,br=g('br');if(br)bc[br]=(bc[br]||0)+1;
+  out.push({d,ds:iso(d),year:''+d.getFullYear(),mi:d.getMonth(),v:nm('v'),vp:nm('vp'),pf:nm('pf'),si:nm('si'),st:norm(g('s')),staff:tc(g('s'))||'—',c:norm(g('c')),cat:g('c').toUpperCase()||'—',brand:tc(g('b'))||'—',item:g('i'),brn:tc(br)||''})});
+ if(!out.length)return false;
  out.sort((x,y)=>x.d-y.d);SMC=out;const top=Object.keys(bc).sort((a,b)=>bc[b]-bc[a])[0];if(top)setBranch(top);
  if(!noSave)idbPut('smc',{a:[sm[0],...sm.slice(1).filter(r=>pd(r[I.d]))]});
- initSmc()}
+ initSmc();$('sm_st').textContent=out.length+' exchange rows · '+out[0].ds+' to '+out[out.length-1].ds;return true}
 function initSmc(){
- const rg=[SMC[0].d,SMC[SMC.length-1].d],U=k=>['All',...[...new Set(SMC.map(r=>r[k]))].sort()];
- $('sm_c').innerHTML=S('sm_v','View',[['Month','Month'],['Quarter','Quarter'],['FY','Financial year'],['All','All data'],['Date','Date / range']])+S('sm_p','Period',[])+DT('sm',rg[1])+S('sm_staff','Staff',U('staff'))+S('sm_cat','Category',U('cat'))+S('sm_amt','Amount',[['gt','Greater than ₹500'],['le','₹500 or less'],['all','All']]);
+ const rg=[SMC[0].d,SMC[SMC.length-1].d],U=k=>['All',...[...new Set(SMC.map(r=>r[k]))].sort()],bs=[...new Set(SMC.map(r=>r.brn).filter(Boolean))].sort();
+ $('sm_c').innerHTML=S('sm_v','View',[['Month','Month'],['Quarter','Quarter'],['FY','Financial year'],['All','All data'],['Date','Date / range']])+S('sm_p','Period',[])+DT('sm',rg[1])+S('sm_staff','Staff',U('staff'))+(bs.length>1||HASBR?S('sm_br','Branch',['All',...bs]):'')+S('sm_cat','Category',U('cat'))+S('sm_amt','Amount',[['ge','₹500 and above'],['lt','Less than ₹500'],['all','All']]);
  fillP('sm',['sm_p'],[0],rg);wire('sm_c','sm',['sm_p'],[0],renderSmc,rg)}
 function renderSmc(){
  const K=$('sm_k');
- if(!SMC.length){K.innerHTML='<div class="note">Upload the Sales Data workbook that has the smcdumb sheet to see exchange (SMC) data.</div>';['sm_t','sm_s','sm_d'].forEach(i=>$(i).innerHTML='');$('sm_sub').textContent='';return}
+ if(!SMC.length){K.innerHTML='<div class="note">Upload the exchange (smcdumb) sheet with “Upload SMC sheet” (or the Sales Data workbook that contains it) to see exchange data.</div>';['sm_t','sm_s','sm_d'].forEach(i=>$(i).innerHTML='');$('sm_sub').textContent='';$('sm_st').textContent='';return}
  const p=rng('sm','sm_p');if(!p)return;
- const sf=$('sm_staff').value,ct=$('sm_cat').value,am=$('sm_amt').value,d=SMC.filter(r=>r.d>=p.s&&r.d<=p.e&&(sf=='All'||r.staff==sf)&&(ct=='All'||r.cat==ct)&&(am=='all'||(am=='gt'?r.v>500:r.v<=500)));
- const n=d.length,tv_=d.reduce((a,r)=>a+r.v,0),mx=d.reduce((m,r)=>Math.max(m,r.v),0),nc=c=>d.filter(r=>r.cat==c).length;
- const dB=SMC.filter(r=>r.d>=p.s&&r.d<=p.e&&(sf=='All'||r.staff==sf)&&(am=='all'||(am=='gt'?r.v>500:r.v<=500))&&r.cat=='DE'),dm=new Map(),mq=new Map();
+ const sf=$('sm_staff').value,ct=$('sm_cat').value,am=$('sm_amt').value,sb=$('sm_br')?$('sm_br').value:'All',
+  base=r=>r.d>=p.s&&r.d<=p.e&&(sf=='All'||r.staff==sf)&&(sb=='All'||r.brn==sb)&&(am=='all'||(am=='ge'?r.v>=500:r.v<500)),d=SMC.filter(r=>base(r)&&(ct=='All'||r.cat==ct));
+ const n=d.length,sum=k=>d.reduce((a,r)=>a+r[k],0),tv_=sum('v'),vp=sum('vp'),pf=sum('pf'),si=sum('si'),mx=d.reduce((m,r)=>Math.max(m,r.v),0),nc=c=>d.filter(r=>r.cat==c).length;
+ const dB=SMC.filter(r=>base(r)&&r.cat=='DE'),dm=new Map(),mq=new Map();
  dB.forEach(r=>dm.set(norm(r.staff),(dm.get(norm(r.staff))||0)+1));
- rows.forEach(r=>{if(r.d>=p.s&&r.d<=p.e&&r.G=='mobile')mq.set(norm(r.staff),(mq.get(norm(r.staff))||0)+r.qty)});
+ rows.forEach(r=>{if(r.d>=p.s&&r.d<=p.e&&r.G=='mobile'&&(!HASBR||sb=='All'||r.branch==sb))mq.set(norm(r.staff),(mq.get(norm(r.staff))||0)+r.qty)});
  const mob=sf=='All'?[...mq.values()].reduce((a,b)=>a+b,0):(mq.get(norm(sf))||0),att=(a,b)=>b?a/b*100:null;
  K.innerHTML=[['Exchanges',fmt(n)],['Exchange value',inr(tv_)],['Avg per exchange',n?inr(tv_/n):'—'],['Highest',n?inr(mx):'—'],['DE exchanges',fmt(nc('DE'))],['CE exchanges',fmt(nc('CE'))],
-  ['Attachment share',pct(att(dB.length,mob)),rows.length?`${fmt(dB.length)} DE smc / ${fmt(mob)} mobiles`:'needs the Sales Data upload']]
+  ['Attachment share',pct(att(dB.length,mob)),rows.length?`${fmt(dB.length)} DE / ${fmt(mob)} mobiles`:'needs the Sales Data upload'],
+  ['Vendor price',inr(vp),`${fmt(d.filter(r=>r.vp).length)} of ${fmt(n)} items priced`],['Profit',inr(pf),n?inr(pf/n)+' per exchange':''],['Store incentive',inr(si)]]
   .map(([l,v,x])=>`<div class="kpi"><span>${l}</span><b>${v}</b>${x?`<small>${x}</small>`:''}</div>`).join('');
- $('sm_sub').textContent=`${p.l} · ${n} exchanges · amount: ${{gt:'greater than ₹500',le:'₹500 or less',all:'all'}[am]}`+(sf=='All'?'':' · '+sf)+(ct=='All'?'':' · '+ct);
- const multi=new Set(d.map(r=>r.year+r.mi)).size>1,agg=kf=>{const m=new Map();d.forEach(r=>{const k=kf(r),o=m.get(k)||{k,v:0,q:0,de:0,ce:0};o.v+=r.v;o.q++;if(r.cat=='DE')o.de++;if(r.cat=='CE')o.ce++;m.set(k,o)});return [...m.values()]};
+ $('sm_sub').textContent=`${p.l} · ${n} exchanges · amount: ${{ge:'₹500 and above',lt:'less than ₹500',all:'all'}[am]}`+(sf=='All'?'':' · '+sf)+(ct=='All'?'':' · '+ct);
+ const multi=new Set(d.map(r=>r.year+r.mi)).size>1,agg=kf=>{const m=new Map();d.forEach(r=>{const k=kf(r),o=m.get(k)||{k,v:0,q:0,de:0,ce:0,vp:0,pf:0,si:0};o.v+=r.v;o.q++;o.vp+=r.vp;o.pf+=r.pf;o.si+=r.si;if(r.cat=='DE')o.de++;if(r.cat=='CE')o.ce++;m.set(k,o)});return [...m.values()]};
  const Tm=agg(multi?r=>r.ds.slice(0,7):r=>r.ds).sort((a,b)=>a.k<b.k?-1:1),St=agg(r=>r.staff).sort((a,b)=>b.v-a.v),lb=k=>multi?MN[+k.slice(5)-1].slice(0,3)+' '+k.slice(2,4):(+k.slice(8))+' '+MN[+k.slice(5,7)-1].slice(0,3);
- const row=(l,o)=>`<tr><td>${esc(l)}</td><td>${fmt(o.q)}</td><td>${fmt(o.v)}</td><td>${o.q?fmt(o.v/o.q):'—'}</td>`;
- $('sm_t').innerHTML=`<thead><tr><th>${multi?'Month':'Date'}</th><th>Exchanges</th><th>Value</th><th>Avg</th><th>DE</th><th>CE</th></tr></thead><tbody>`+
-  [{k:'Total',v:tv_,q:n,de:nc('DE'),ce:nc('CE')},...Tm].map((o,i)=>row(i?lb(o.k):'Total',o).replace('<tr>',i?'<tr>':'<tr class="tot">')+`<td>${fmt(o.de)}</td><td>${fmt(o.ce)}</td></tr>`).join('')+'</tbody>';
- $('sm_s').innerHTML='<thead><tr><th>Staff</th><th>Exchanges</th><th>Value</th><th>Avg</th><th>Share</th><th>Attach % (DE ÷ mobiles)</th></tr></thead><tbody>'+St.map(o=>row(o.k,o)+`<td>${pct(tv_?o.v/tv_*100:null)}</td><td>${pct(att(dm.get(norm(o.k))||0,mq.get(norm(o.k))||0))}</td></tr>`).join('')+'</tbody>';
- $('sm_d').innerHTML='<thead><tr><th>Date</th><th>Staff</th><th>Brand</th><th>Item</th><th>Category</th><th>Amount</th></tr></thead><tbody>'+
-  d.slice(0,300).map(r=>`<tr><td>${r.ds}</td><td>${esc(r.staff)}</td><td>${esc(r.brand)}</td><td style="text-align:left">${esc(r.item)}</td><td>${esc(r.cat)}</td><td>${fmt(r.v)}</td></tr>`).join('')+'</tbody>'+(n>300?`<tfoot><tr><td colspan="6">Showing the first 300 of ${n}</td></tr></tfoot>`:'');
+ const row=(l,o)=>`<tr><td>${esc(l)}</td><td>${fmt(o.q)}</td><td>${fmt(o.v)}</td><td>${o.q?fmt(o.v/o.q):'—'}</td>`,ex3=o=>`<td>${fmt(o.vp)}</td><td>${fmt(o.pf)}</td><td>${fmt(o.si)}</td>`;
+ $('sm_t').innerHTML=`<thead><tr><th>${multi?'Month':'Date'}</th><th>Exchanges</th><th>Value</th><th>Avg</th><th>DE</th><th>CE</th><th>Vendor price</th><th>Profit</th><th>Incentive</th></tr></thead><tbody>`+
+  [{k:'Total',v:tv_,q:n,de:nc('DE'),ce:nc('CE'),vp,pf,si},...Tm].map((o,i)=>row(i?lb(o.k):'Total',o).replace('<tr>',i?'<tr>':'<tr class="tot">')+`<td>${fmt(o.de)}</td><td>${fmt(o.ce)}</td>`+ex3(o)+'</tr>').join('')+'</tbody>';
+ $('sm_s').innerHTML='<thead><tr><th>Staff</th><th>Exchanges</th><th>Value</th><th>Avg</th><th>Share</th><th>Vendor price</th><th>Profit</th><th>Incentive</th><th>Attach %</th></tr></thead><tbody>'+
+  St.map(o=>row(o.k,o)+`<td>${pct(tv_?o.v/tv_*100:null)}</td>`+ex3(o)+`<td>${pct(att(dm.get(norm(o.k))||0,mq.get(norm(o.k))||0))}</td></tr>`).join('')+'</tbody>';
+ $('sm_d').innerHTML='<thead><tr><th>Date</th><th>Staff</th><th>Brand</th><th>Item</th><th>Category</th><th>Amount</th><th>Vendor price</th><th>Profit</th><th>Incentive</th></tr></thead><tbody>'+
+  d.slice().reverse().slice(0,300).map(r=>`<tr><td>${r.ds}</td><td>${esc(r.staff)}</td><td>${esc(r.brand)}</td><td style="text-align:left">${esc(r.item)}</td><td>${esc(r.cat)}</td><td>${fmt(r.v)}</td><td>${fmt(r.vp)}</td><td>${fmt(r.pf)}</td><td>${fmt(r.si)}</td></tr>`).join('')+'</tbody>'+(n>300?`<tfoot><tr><td colspan="9">Showing the latest 300 of ${n}</td></tr></tfoot>`:'');
  theme();const bar=(id,a,col)=>mk(id,{type:'bar',data:{labels:a.map(o=>o.k),datasets:[VQ(a,{backgroundColor:col,borderRadius:4})]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>inr(c.parsed.x)}}},scales:{x:{ticks:{callback:cmp}}}}});
  mk('c_sm1',{type:'bar',data:{labels:Tm.map(o=>lb(o.k)),datasets:[VQ(Tm,{label:'Exchange value (₹)',backgroundColor:COL[2],borderRadius:3,yAxisID:'y'}),
   {type:'line',label:'Exchanges',data:Tm.map(o=>o.q),v:Tm.map(o=>o.v),q:Tm.map(o=>o.q),noTip:1,borderColor:COL[0],backgroundColor:COL[0],tension:.3,yAxisID:'y1'}]},
@@ -657,12 +660,21 @@ function renderSmc(){
  bar('c_sm2',St.slice(0,12),COL[1]);
  const ca=agg(r=>r.cat).sort((a,b)=>b.v-a.v);
  mk('c_sm3',{type:'doughnut',data:{labels:ca.map(o=>o.k),datasets:[VQ(ca,{backgroundColor:COL,borderWidth:0})]},options:{cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+inr(c.parsed)}}}}});
- const BD=[['≤ 500',0,500],['501–1,000',500,1000],['1,001–2,500',1000,2500],['2,501–5,000',2500,5000],['5,001–10,000',5000,10000],['> 10,000',10000,1e12]].map(([k,lo,hi])=>{const g=d.filter(r=>r.v>lo&&r.v<=hi||(lo==0&&r.v<=0));return{k,q:g.length,v:g.reduce((a,r)=>a+r.v,0)}});
+ const BD=[['Below 500',0,500],['500–999',500,1000],['1,000–2,499',1000,2500],['2,500–4,999',2500,5000],['5,000–9,999',5000,10000],['10,000+',10000,1e12]].map(([k,lo,hi])=>{const g=d.filter(r=>r.v>=lo&&r.v<hi);return{k,q:g.length,v:g.reduce((a,r)=>a+r.v,0)}});
  mk('c_sm4',{type:'bar',data:{labels:BD.map(o=>o.k),datasets:[{label:'Exchanges',data:BD.map(o=>o.q),q:BD.map(o=>o.q),v:BD.map(o=>o.v),backgroundColor:COL[3],borderRadius:4}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},scales:{y:{ticks:{precision:0}}}}});
- bar('c_sm5',agg(r=>r.brand).sort((a,b)=>b.v-a.v).slice(0,10),COL[4])}
+ bar('c_sm5',agg(r=>r.brand).sort((a,b)=>b.v-a.v).slice(0,10),COL[4]);
+ const Sp=St.slice().sort((a,b)=>b.pf-a.pf);
+ mk('c_sm6',{type:'bar',data:{labels:Sp.map(o=>o.k),datasets:[{label:'Profit (₹)',data:Sp.map(o=>o.pf),v:Sp.map(o=>o.v),q:Sp.map(o=>o.q),backgroundColor:COL[1],borderRadius:4},{label:'Store incentive (₹)',data:Sp.map(o=>o.si),noTip:1,backgroundColor:COL[2],borderRadius:4}]},
+  options:{scales:{y:{ticks:{callback:cmp}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+inr(c.parsed.y)}}}}})}
+const isSMC=a=>{const h=(a[0]||[]).map(norm);return h.includes('enquiry_no')||h.includes('imei_no')},isMG=a=>a.slice(0,6).some(r=>r.some(c=>norm(c)==='job count')),
+ smcDone=()=>{if(rows.length)renderAll();else{renderSmc();renderMg()}};
 
 function renderAll(){renderTgt();renderGen();renderGr();renderBs();renderAt();renderDy();renderSmc();renderMg();bottom()}
-$('sfile').onchange=e=>{const f=e.target.files[0];if(f)readSheet(f,'dumb',(a,n,x)=>loadSales(a,f.name+' ('+n+')',x),['smcdumb','mygcare']);e.target.value=''};
+$('sfile').onchange=e=>{const f=e.target.files[0];if(f)readSheet(f,'dumb',(a,n,x)=>{
+  if(isSMC(a)){if(loadSMC(a))smcDone();else alert('Could not read the exchange sheet.')}
+  else if(isMG(a))loadMG(a);
+  else loadSales(a,f.name+' ('+n+')',x)},['smcdumb','mygcare']);e.target.value=''};
+$('xfile').onchange=e=>{const f=e.target.files[0];if(f)readSheet(f,'smcdumb',a=>{if(loadSMC(a))smcDone();else alert('Could not find the Date and Amount columns in the exchange sheet.')});e.target.value=''};
 $('mfile').onchange=e=>{const f=e.target.files[0];if(f)readSheet(f,'mygcare',a=>loadMG(a));e.target.value=''};
 $('tfile').onchange=e=>{const f=e.target.files[0];if(f)readSheet(f,'target',(a,n)=>loadT(a,f.name+' ('+n+')'));e.target.value=''};
 $('tview').onchange=()=>{buildPer();renderTgt()};
@@ -675,12 +687,11 @@ $('tg').onchange=()=>setTheme($('tg').checked,1);
 $('clr').onclick=e=>{e.preventDefault();Promise.all(['dumb','smc','mg'].map(idbDel)).then(()=>location.reload())};
 $('rdate').value=iso(new Date());
 if(T)$('st_t').textContent='Saved on this device · '+(T.label||'targets loaded');
-// ---- floating "Buy me a coffee" tip widget ----
+// ---- "Buy me a coffee" tip modal (opened from the footer link) ----
 (()=>{
- const UPI='abduramshad@upi',E=id=>document.getElementById(id),W=E('tpw'),O=E('tpo'),ua=navigator.userAgent,
+ const UPI='abduramshad@upi',E=id=>document.getElementById(id),O=E('tpo'),ua=navigator.userAgent,
   mob=/Android|iPhone|iPad|iPod/i.test(ua)||(navigator.maxTouchPoints>1&&/Macintosh/.test(ua));
- let amt=100,gone=false,tick=0,shown=false;
- try{gone=sessionStorage.getItem('sd_tip_x')=='1'}catch(e){}
+ let amt=100;
  if(mob)O.classList.add('mob');
  const cur=()=>E('tpa').value!==''?parseFloat(E('tpa').value):amt,ok=a=>isFinite(a)&&a>=1&&a<=100000;
  const url=a=>`upi://pay?pa=${UPI}&pn=${encodeURIComponent('abduRamshad')}&am=${Number.isInteger(a)?a:a.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Coffee tip')}`;
@@ -697,7 +708,6 @@ if(T)$('st_t').textContent='Saved on this device · '+(T.label||'targets loaded'
  const close=()=>{O.classList.remove('on');O.setAttribute('aria-hidden','true');document.body.style.overflow='';E('tpb').focus()};
  E('tpb').onclick=open;E('tpc').onclick=close;O.onclick=e=>{if(e.target===O)close()};
  document.addEventListener('keydown',e=>{if(e.key=='Escape'&&O.classList.contains('on'))close()});
- E('tpx').onclick=()=>{W.classList.remove('show');W.setAttribute('aria-hidden','true');gone=true;try{sessionStorage.setItem('sd_tip_x','1')}catch(e){}};
  E('tpch').onclick=e=>{const b=e.target.closest('button');if(!b)return;amt=+b.dataset.a;E('tpa').value='';msg('');refresh()};
  E('tpa').oninput=()=>{msg('');refresh()};
  E('tpsq').onclick=()=>{O.classList.toggle('qr');E('tpsq').textContent=O.classList.contains('qr')?'Hide QR code':'Show QR code'};
@@ -708,10 +718,6 @@ if(T)$('st_t').textContent='Saved on this device · '+(T.label||'targets loaded'
  E('tpcp').onclick=()=>{const done=()=>msg('UPI ID copied: '+UPI);
   try{navigator.clipboard.writeText(UPI).then(done,()=>fb())}catch(e){fb()}
   function fb(){const t=document.createElement('textarea');t.value=UPI;document.body.appendChild(t);t.select();try{document.execCommand('copy');done()}catch(e){msg('UPI ID: '+UPI)}t.remove()}};
- const near=()=>{const h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);return h-(window.scrollY+window.innerHeight)<Math.max(500,window.innerHeight*.5)};
- const reveal=()=>{if(gone||shown)return;shown=true;W.classList.add('show');W.setAttribute('aria-hidden','false')};
- addEventListener('scroll',()=>{if(!tick)tick=requestAnimationFrame(()=>{tick=0;if(near())reveal()})},{passive:true});
- setTimeout(()=>{if(document.documentElement.scrollHeight<=window.innerHeight+80)reveal()},8000);
  refresh()})();
 
 renderTgt();renderMg();renderSmc();
