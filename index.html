@@ -126,7 +126,7 @@ tbody tr:hover{background:rgba(76,110,245,.14)}
   </section>
 
   <h2 class="sec">Sales analysis</h2>
-  <div class="card"><div id="filters" class="filters"></div><button id="reset" class="ghost">Reset filters</button> <small id="count"></small></div>
+  <div class="card"><div class="tc" id="sa_c" style="margin-bottom:10px"></div><div id="filters" class="filters"></div><button id="reset" class="ghost">Reset filters</button> <small id="count"></small></div>
   <div class="ins" id="ins"></div>
   <section id="kpis" class="kpis" style="margin-top:0"></section>
   <section class="grid">
@@ -136,6 +136,7 @@ tbody tr:hover{background:rgba(76,110,245,.14)}
     <div class="card"><h2>Top brands by sales</h2><div class="cv"><canvas id="c_brand"></canvas></div></div>
     <div class="card"><h2>Sales by product group</h2><div class="cv"><canvas id="c_prod"></canvas></div></div>
     <div class="card wide"><h2>Top item categories by sales</h2><div class="cv"><canvas id="c_icat"></canvas></div></div>
+    <div class="card wide"><h2>Top 10 items by sales</h2><div class="cv" style="height:380px"><canvas id="c_item"></canvas></div></div>
     
   </section>
 
@@ -170,6 +171,15 @@ tbody tr:hover{background:rgba(76,110,245,.14)}
     <div class="tw" style="margin-top:12px"><table id="dy_t"></table></div>
     <h2 style="margin-top:14px">Attachment share by day <small>(only the Staff filter applies; days and pairs without a share are hidden)</small></h2>
     <div class="tw"><table id="dy_a"></table></div>
+  </section>
+
+  <section class="card sect" id="cu" style="--c:#e8590c">
+    <h2 class="st">Customers: top 20</h2>
+    <div class="tc" id="cu_c"></div>
+    <p class="note" id="cu_sub"></p>
+    <div id="cu_k" class="kpis"></div>
+    <div class="cv" style="height:460px"><canvas id="c_cu"></canvas></div>
+    <div class="tw" style="margin-top:12px;max-height:640px"><table id="cu_t"></table></div>
   </section>
 
   <section class="card sect" id="sm" style="--c:#fab005">
@@ -252,7 +262,7 @@ const SEG=[
 ['Mobile Antivirus','J=Mobile Antivirus'],['ACC + Glamshield','S:Accessories,Glamshield'],['TV >32"','S:40-50 Inches,55 Inches,65 Inches,75+ Inches'],
 ['My Parf','H=My Parf'],['Lap bag','J~Lap bag'],['LG AMC','G=Lg Amc'],['OSG Warranty','G=Osg Warranty'],['LG AMC + OSG','S:LG AMC,OSG Warranty'],
 ['Ultra-Premium >195K','G=Laptop;Q>195000'],['Premium 70k-195k','G=Laptop;Q>=70000;Q<=195000'],['Main-stream 51k-70k','G=Laptop;Q>=51000;Q<70000'],['Entry <51k','G=Laptop;Q>0;Q<51000'],
-['LG Big appl','B=Consumer Electronics;H=LG'],
+['LG Big appl','B=Consumer Electronics;H=LG'],['LG brand','H=LG','',1],
 ['32 Inches','G=Tv;K=32'],['40-50 Inches','G=Tv;K=40-45'],['55 Inches','G=Tv;K=55'],['65 Inches','G=Tv;K=65'],['75+ Inches','G=Tv;K>75'],
 ['AC- STABILIZER','K=AC- STABILIZER'],['TV- STABILIZER','K=TV- STABILIZER'],['REF- STABILIZER','K=REF- STABILIZER'],['Other- STABILIZER','K=Other- STABILIZER'],
 ['Stabilizer (all)','J~Stabilizer','Stabilizer#2'],
@@ -277,7 +287,7 @@ function runSegs(rs){
 const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const QN=['JFM','AMJ','JAS','OND'];
 const COL=['#4c6ef5','#12b886','#f59f00','#e64980','#7950f2','#15aabf','#fd7e14','#82c91e','#868e96','#fa5252'];
-const FL0=[['year','Year'],['quarter','Quarter'],['month','Month'],['category','Category'],['staff','Staff'],['product','Product'],['brand','Brand'],['itemcat','Item category']];let FL=FL0;
+const FL0=[['category','Category'],['staff','Staff'],['product','Product'],['brand','Brand'],['itemcat','Item category']];let FL=FL0;
 const KEY=['Mobile','Laptop','Accessories','CE','Air Conditioner','Tv','Refrigerators','Washing Machines','Tablet','GDOT'];
 let rows=[],src='',ch={},T=null,P=[];
 try{T=JSON.parse(localStorage.getItem('sd_target'))}catch(e){}
@@ -321,14 +331,14 @@ const tv=(k,h)=>{if(!T||h==null)return null;const j=T.hdr.findIndex(x=>norm(x)==
 
 // ---- sales ----
 function loadSales(a,label,xs,noSave){
- const h=a[0].map(norm),I={},K={date:'date',inv:'invoice number',B:'category',staff:'staff',G:'product',H:'brand',J:'item category',K:'item group',disc:'discount',qty:'quantity',amt:'amount',Q:'mop',br:'branch'};
+ const h=a[0].map(norm),I={},K={date:'date',inv:'invoice number',B:'category',staff:'staff',G:'product',H:'brand',J:'item category',K:'item group',disc:'discount',qty:'quantity',amt:'amount',Q:'mop',br:'branch',it:'item',cu:'customer',gr:'item group',pb:'price band'};
  for(const k in K)I[k]=h.indexOf(K[k]);
  if(I.date<0||I.amt<0){alert('Could not find the “Date” and “Amount” columns. Please upload the file/sheet named “dumb”.');return}
  const out=[];
  a.slice(1).forEach(r=>{
   const g=k=>I[k]<0?'':String(r[I[k]]==null?'':r[I[k]]).replace(/\s+/g,' ').trim(),n=k=>parseFloat(g(k).replace(/,/g,''))||0,d=pd(r[I.date]);
   if(!d)return;const mi=d.getMonth();
-  out.push({d,ds:iso(d),year:''+d.getFullYear(),mi,month:MN[mi],quarter:QN[mi/3|0]+(''+d.getFullYear()).slice(2),branch:tc(g('br'))||'',
+  out.push({d,ds:iso(d),year:''+d.getFullYear(),mi,month:MN[mi],quarter:QN[mi/3|0]+(''+d.getFullYear()).slice(2),branch:tc(g('br'))||'',item:g('it')||'—',cust:g('cu')||'—',grp:g('gr')||'—',pb:g('pb'),
    category:g('B')||'—',staff:g('staff')||'—',product:g('G')||'—',brand:g('H')||'—',itemcat:g('J')||'—',inv:g('inv'),
    disc:n('disc'),qty:n('qty'),amt:n('amt'),B:norm(g('B')),G:norm(g('G')),H:norm(g('H')),J:norm(g('J')),K:norm(g('K')),Q:n('Q')})});
  if(!out.length){alert('No dated rows were found in that sheet.');return}
@@ -336,6 +346,7 @@ function loadSales(a,label,xs,noSave){
  $('st_s').textContent=out.length.toLocaleString('en-IN')+' rows · '+out[0].ds+' to '+out[out.length-1].ds+' · '+label+(SMC.length?' · '+SMC.length+' exchange rows':'');
  if(xs&&xs[1])loadMG(xs[1],1,noSave);
  if(!noSave)idbPut('dumb',{a:[a[0],...a.slice(1).filter(r=>pd(r[I.date]))],label});
+ if(!noSave)$('rdate').value=iso(new Date());
  HASBR=out.some(r=>r.branch);FL=HASBR?[...FL0,['branch','Branch']]:FL0;$('t_brw').style.display=HASBR?'':'none';if(HASBR){$('t_br').innerHTML=O(brOpts());$('t_br').onchange=renderTgt}
  head();
  buildFilters();buildPer();initSec();renderAll()}
@@ -373,14 +384,14 @@ function renderTgt(){
  const L=SEG.map((s,i)=>{const a=A[i],k=norm(s[2]||s[0]);let t=tv(k,p.h),est=false;
   if(t==null&&view=='Month'){const q=tv(k,p.q);if(q!=null){t=q*N/qd;est=true}}
   const amt=a?a[0]:null,btd=t!=null&&amt!=null?t-amt:null,crr=amt!=null&&el>0?amt/el:null,tr=crr!=null?crr*N:null;
-  return{n:s[0],t,est,amt,qty:a?a[1]:null,disc:a?a[2]:null,pc:t&&amt!=null?amt/t*100:null,btd,drr:btd!=null&&bal>0?Math.max(btd,0)/bal:null,crr,tr,tp:t&&tr!=null?tr/t*100:null}});
+  return{n:s[0],hid:!!s[3],t,est,amt,qty:a?a[1]:null,disc:a?a[2]:null,pc:t&&amt!=null?amt/t*100:null,btd,drr:btd!=null&&bal>0?Math.max(btd,0)/bal:null,crr,tr,tp:t&&tr!=null?tr/t*100:null}});
  const o=L[0];
  $('tsub').textContent=`${p.l} · ${el} days elapsed · ${bal} balance of ${N} days · report date ${iso(R)}`+(T?'':' · upload the targets to see target figures')+(bsel!='All'?' · branch: '+bsel+' (the Target sheet is not split by branch)':'');
  $('tk').innerHTML=[['Target',o.t==null?'—':(o.est?'≈ ':'')+inr(o.t)],['Achievement',inr(o.amt)],['Ach %',pct(o.pc)],['BTD',o.btd==null?'—':inr(o.btd)],['DRR / day',o.drr==null?'—':inr(o.drr)],['CRR / day',o.crr==null?'—':inr(o.crr)],['Trend',o.tr==null?'—':inr(o.tr)],['Trend %',pct(o.tp)],['Qty sold',fmt(o.qty)],['ASP',o.qty?inr(o.amt/o.qty):'—'],['Discount',inr(o.disc)],['Discount %',o.amt?pct(o.disc/o.amt*100):'—']]
   .map(([l,v])=>`<div class="kpi"><span>${l}</span><b>${v}</b></div>`).join('');
  const hide=$('hide').checked;
  tb.innerHTML='<thead><tr><th>Segment</th><th>Target</th><th>Achievement</th><th>Ach %</th><th>BTD</th><th>DRR</th><th>CRR</th><th>Trend</th><th>Trend %</th><th>Qty</th><th>ASP</th><th>Discount</th><th>Discount %</th></tr></thead><tbody>'+
-  L.filter(r=>!hide||r.t!=null||r.amt).map(r=>`<tr${r.n=='Overall'?' class="tot"':''}><td>${esc(r.n)}</td><td>${r.est?'≈ ':''}${fmt(r.t)}</td><td>${r.amt==null?'n/a':fmt(r.amt)}</td>`+
+  L.filter(r=>!r.hid&&(!hide||r.t!=null||r.amt)).map(r=>`<tr${r.n=='Overall'?' class="tot"':''}><td>${esc(r.n)}</td><td>${r.est?'≈ ':''}${fmt(r.t)}</td><td>${r.amt==null?'n/a':fmt(r.amt)}</td>`+
    `<td style="background:linear-gradient(90deg,rgba(76,110,245,.25) ${Math.min(r.pc||0,100)}%,transparent ${Math.min(r.pc||0,100)}%)">${pct(r.pc)}</td><td>${fmt(r.btd)}</td><td>${fmt(r.drr)}</td><td>${fmt(r.crr)}</td><td>${fmt(r.tr)}</td>`+
    `<td class="${r.tp==null?'':r.tp>=100?'pos':'neg'}">${pct(r.tp)}</td><td>${fmt(r.qty)}</td><td>${r.qty?fmt(r.amt/r.qty):'—'}</td><td>${fmt(r.disc)}</td><td>${r.amt?pct(r.disc/r.amt*100):'—'}</td></tr>`).join('')+'</tbody>';
  theme();const K=KEY.map(n=>L[ix[n]]),KT=K.filter(r=>r.t!=null),X=(a,q)=>Object.assign({v:a.map(r=>r.amt),q:a.map(r=>r.qty),borderRadius:3},q);
@@ -394,9 +405,9 @@ function renderTgt(){
 // ---- general analysis (uses all filters) ----
 function renderGen(){
  if(!rows.length)return;
- const sel={};FL.forEach(([k])=>sel[k]=$('f_'+k).value);
- const d=rows.filter(r=>FL.every(([k])=>sel[k]==='All'||r[k]===sel[k]));
- $('count').textContent=`${d.length.toLocaleString('en-IN')} of ${rows.length.toLocaleString('en-IN')} rows · ${src}`;
+ const sel={},pr=rng('sa','sa_p');if(!pr)return;FL.forEach(([k])=>sel[k]=$('f_'+k).value);
+ const d=rows.filter(r=>r.d>=pr.s&&r.d<=pr.e&&FL.every(([k])=>sel[k]==='All'||r[k]===sel[k]));
+ $('count').textContent=`${d.length.toLocaleString('en-IN')} of ${rows.length.toLocaleString('en-IN')} rows · ${pr.l} · ${src}`;
  const sum=f=>d.reduce((s,r)=>s+f(r),0),sales=sum(r=>r.amt),units=sum(r=>r.qty),disc=sum(r=>r.disc),inv=new Set(d.map(r=>r.inv)).size;
  $('kpis').innerHTML=[['Net sales',inr(sales)],['Units sold',units.toLocaleString('en-IN')],['Invoices',inv.toLocaleString('en-IN')],['Avg. bill value',inv?inr(sales/inv):'—'],['Discount given',inr(disc)],['Discount %',(sales+disc)>0?(disc/(sales+disc)*100).toFixed(1)+'%':'—']]
   .map(([l,v])=>`<div class="kpi"><span>${l}</span><b>${v}</b></div>`).join('');
@@ -417,7 +428,10 @@ function renderGen(){
  mk('c_cat',{type:'doughnut',data:{labels:cat.map(o=>o.k),datasets:[VQ(cat,{backgroundColor:COL,borderWidth:0})]},options:{cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+inr(c.parsed)}}}}});
  const bar=(id,key,n,i)=>{const t=byv(agg(r=>r[key]),n);mk(id,{type:'bar',data:{labels:t.map(o=>o.k),datasets:[VQ(t,{backgroundColor:COL[i],borderRadius:4})]},
   options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>inr(c.parsed.x)}}},scales:{x:{ticks:{callback:cmp}}}}})};
- bar('c_staff','staff',10,1);bar('c_brand','brand',10,4);bar('c_prod','product',10,3);bar('c_icat','itemcat',12,5)}
+ bar('c_staff','staff',10,1);bar('c_brand','brand',10,4);bar('c_prod','product',10,3);bar('c_icat','itemcat',12,5);
+ const it=byv(agg(r=>r.item),10);
+ mk('c_item',{type:'bar',data:{labels:it.map(o=>o.k),datasets:[VQ(it,{backgroundColor:COL[6],borderRadius:4})]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>inr(c.parsed.x)}}},
+  scales:{x:{ticks:{callback:cmp}},y:{ticks:{callback(v){const l=this.getLabelForValue(v);return l.length>34?l.slice(0,33)+'…':l}}}}}})}
 // ---- monthly and quarterly analysis (date filters ignored) ----
 function bottom(){
  const ks=[['staff','ma_staff'],['category','ma_cat'],['product','ma_prod'],['brand','ma_brand'],['itemcat','ma_ic'],...(HASBR?[['branch','ma_br']]:[])],flt=ks.some(([k,id])=>$(id).value!='All'),R=pd($('rdate').value)||new Date(),
@@ -460,13 +474,17 @@ function fillP(b,pids,offs,rg){
 function wire(box,b,pids,offs,cb,rg){$(box).querySelectorAll('select,input').forEach(e=>e.onchange=()=>{if(b&&e.id==b+'_v')fillP(b,pids,offs,rg);cb()})}
 const PAIRS=[['Mobile','Mobile','Accessories','Accessories'],['Mobile','Mobile','GDOT','GDOT care'],['Mobile','Mobile','Mobile Antivirus','Mobile antivirus'],['Mobile','Mobile','Glamshield','Glamshield'],['Mobile','Mobile','@SMC','Exchange (SMC)'],
  ['Laptop','Laptop','Printer','Printer'],['Laptop','Laptop','Laptop Antivirus','Laptop antivirus (Total Security)'],['Laptop','Laptop','IT Accessories','IT accessories'],
- ['Consumer Electronics','CE','OSG Warranty','OSG warranty'],['TV','Tv','Home theatre','Home theatre'],['TV','Tv','TV- STABILIZER','TV stabilizer'],['Air Conditioner','Air Conditioner','AC- STABILIZER','AC stabilizer'],['Refrigerator','Refrigerators','REF- STABILIZER','Ref stabilizer']];
+ ['Consumer Electronics','CE','OSG Warranty','OSG warranty','CE → OSG'],['Consumer Electronics','LG brand','LG AMC','LG AMC','LG → LG AMC'],['TV','Tv','Home theatre','Home theatre'],['TV','Tv','TV- STABILIZER','TV stabilizer'],['Air Conditioner','Air Conditioner','AC- STABILIZER','AC stabilizer'],['Refrigerator','Refrigerators','REF- STABILIZER','Ref stabilizer']];
+const plab=x=>x[4]||x[0]+' → '+x[3];
 const smcOf=(s,e,stf,br)=>{const t=[0,0,0],f=stf&&stf!='All'?norm(stf):null;SMC.forEach(r=>{if(r.d>=s&&r.d<=e&&r.c=='de'&&(!f||r.st==f)&&(!br||br=='All'||r.brn==br)){t[0]+=r.v;t[1]++}});return t};
 const pairVals=(A,b,a,smc)=>{const g=n=>n=='@SMC'?smc:A[SIX[n]],x=g(b),y=g(a);return{b:{v:x[0],q:x[1]},a:{v:y[0],q:y[1]}}};
 const gcl=x=>x==null?'':x>=0?'pos':'neg',garr=x=>x==null?'—':(x>=0?'▲ ':'▼ ')+Math.abs(x).toFixed(1)+'%',gg=(a,b)=>a?(b-a)/a*100:null;
 
 function initSec(){
  const L=rows[rows.length-1].d,F=new Date(L.getFullYear(),L.getMonth(),1);
+ $('sa_c').innerHTML=PKH('sa',1,1)+S('sa_p','Period',[])+DT('sa',L);$('sa_v').value='All';fillP('sa',['sa_p'],[0]);wire('sa_c','sa',['sa_p'],[0],renderGen);
+ $('cu_c').innerHTML=PKH('cu',1,1)+S('cu_p','Period',[])+DT('cu',L)+S('cu_staff','Staff',uniq('staff'))+BF('cu_br')+S('cu_cat','Category',uniq('category'))+S('cu_prod','Product',uniq('product'))+S('cu_brand','Brand',uniq('brand'))+S('cu_ic','Item category',uniq('itemcat'))+S('cu_grp','Item group',uniq('grp'))+RV('cum');
+ $('cu_v').value='All';fillP('cu',['cu_p'],[0]);wire('cu_c','cu',['cu_p'],[0],renderCu);
  $('ma_c').innerHTML=S('ma_staff','Staff',uniq('staff'))+S('ma_cat','Category',uniq('category'))+S('ma_prod','Product',uniq('product'))+S('ma_brand','Brand',uniq('brand'))+S('ma_ic','Item category',uniq('itemcat'))+BF('ma_br');wire('ma_c',null,[],[],bottom);
  $('gr_c').innerHTML=PKH('gv')+S('g1_p','Period 1 (base)',[])+S('g2_p','Period 2 (compare)',[])+S('g_cat','Category',uniq('category'))+S('g_prod','Product',uniq('product'))+S('g_brand','Brand',uniq('brand'))+S('g_staff','Staff',uniq('staff'))+BF('g_br')+
   S('g_by','Break down by',[['category','Category'],['product','Product'],['brand','Brand'],['itemcat','Item category'],['staff','Staff']])+'<label class="f chk"><input type="checkbox" id="g_same" checked> Compare till same date</label>';
@@ -515,7 +533,7 @@ function renderBs(){
 // ---- attachment share ----
 function renderAt(){
  const p=rng('at','at_p');if(!p)return;const m=mval('atm'),prod=$('at_prod').value,sf=$('at_staff').value,A=runSegs(rows.filter(r=>r.d>=p.s&&r.d<=p.e&&(sf=='All'||r.staff==sf)&&brOK(r,'at_br'))),smc=smcOf(p.s,p.e,sf,HASBR?$('at_br').value:'All'),w=m=='v'?'value':'qty';
- const L=PAIRS.filter(x=>prod=='All'||x[0]==prod).map(x=>{const o=pairVals(A,x[1],x[2],smc),b=o.b[m],a=o.a[m];return{n:x[0]+' → '+x[3],b:o.b,a:o.a,pc:b?a/b*100:null,sp:a+b?a/(a+b)*100:null}});
+ const L=PAIRS.filter(x=>prod=='All'||x[0]==prod).map(x=>{const o=pairVals(A,x[1],x[2],smc),b=o.b[m],a=o.a[m];return{n:plab(x),b:o.b,a:o.a,pc:b?a/b*100:null,sp:a+b?a/(a+b)*100:null}});
  $('at_n').textContent=`${p.l} · Attach % = attach ${w} ÷ base ${w}. Split = base : attach share of their combined ${w}.`+(SMC.length?'':' Exchange (SMC) needs the smcdumb sheet: upload the full workbook.');
  theme();mk('c_at',{type:'bar',data:{labels:L.map(o=>o.n),datasets:[{label:'Base '+w,data:L.map(o=>o.b[m]),v:L.map(o=>o.b.v),q:L.map(o=>o.b.q),backgroundColor:COL[8],borderRadius:3,yAxisID:'y'},
   {label:'Attach '+w,data:L.map(o=>o.a[m]),v:L.map(o=>o.a.v),q:L.map(o=>o.a.q),backgroundColor:COL[2],borderRadius:3,yAxisID:'y'},
@@ -545,7 +563,7 @@ function renderDy(){
  const stf=$('dy_staff').value,AD=days.map(o=>{const A=runSegs(W.get(o.k)||[]),sm=smcOf(o.d,o.d,stf,HASBR?$('dy_br').value:'All');
   return{o,r:PAIRS.map(x=>{const t=pairVals(A,x[1],x[2],sm),b=t.b[m],a=t.a[m];return b>0&&a>0?{pc:a/b*100,a,b}:null})}});
  const cols=PAIRS.map((x,i)=>AD.some(d=>d.r[i])?i:-1).filter(i=>i>=0),RA=AD.filter(d=>cols.some(i=>d.r[i])),f2=v=>m=='v'?fmt(v):fmt(v);
- $('dy_a').innerHTML=cols.length?'<thead><tr><th>Date</th>'+cols.map(i=>`<th>${esc(PAIRS[i][1]=='CE'?'CE':PAIRS[i][0])} → ${esc(PAIRS[i][3])}</th>`).join('')+'</tr></thead><tbody>'+
+ $('dy_a').innerHTML=cols.length?'<thead><tr><th>Date</th>'+cols.map(i=>`<th>${esc(plab(PAIRS[i]))}</th>`).join('')+'</tr></thead><tbody>'+
   RA.map(d=>`<tr><td>${d.o.k}</td>`+cols.map(i=>{const c=d.r[i];return `<td>${c?pct(c.pc)+' <small>('+f2(c.a)+' / '+f2(c.b)+')</small>':'—'}</td>`}).join('')+'</tr>').join('')+'</tbody>':'<tr><td>No attachment sales in this range.</td></tr>'}
 
 // ---- myG Care (service) ----
@@ -647,10 +665,13 @@ function renderSmc(){
  const multi=new Set(d.map(r=>r.year+r.mi)).size>1,agg=kf=>{const m=new Map();d.forEach(r=>{const k=kf(r),o=m.get(k)||{k,v:0,q:0,de:0,ce:0,vp:0,pf:0,si:0};o.v+=r.v;o.q++;o.vp+=r.vp;o.pf+=r.pf;o.si+=r.si;if(r.cat=='DE')o.de++;if(r.cat=='CE')o.ce++;m.set(k,o)});return [...m.values()]};
  const Tm=agg(multi?r=>r.ds.slice(0,7):r=>r.ds).sort((a,b)=>a.k<b.k?-1:1),St=agg(r=>r.staff).sort((a,b)=>b.v-a.v),lb=k=>multi?MN[+k.slice(5)-1].slice(0,3)+' '+k.slice(2,4):(+k.slice(8))+' '+MN[+k.slice(5,7)-1].slice(0,3);
  const row=(l,o)=>`<tr><td>${esc(l)}</td><td>${fmt(o.q)}</td><td>${fmt(o.v)}</td><td>${o.q?fmt(o.v/o.q):'—'}</td>`,ex3=o=>`<td>${fmt(o.vp)}</td><td>${fmt(o.pf)}</td><td>${fmt(o.si)}</td>`;
- $('sm_t').innerHTML=`<thead><tr><th>${multi?'Month':'Date'}</th><th>Exchanges</th><th>Value</th><th>Avg</th><th>DE</th><th>CE</th><th>Vendor price</th><th>Profit</th><th>Incentive</th></tr></thead><tbody>`+
-  [{k:'Total',v:tv_,q:n,de:nc('DE'),ce:nc('CE'),vp,pf,si},...Tm].map((o,i)=>row(i?lb(o.k):'Total',o).replace('<tr>',i?'<tr>':'<tr class="tot">')+`<td>${fmt(o.de)}</td><td>${fmt(o.ce)}</td>`+ex3(o)+'</tr>').join('')+'</tbody>';
- $('sm_s').innerHTML='<thead><tr><th>Staff</th><th>Exchanges</th><th>Value</th><th>Avg</th><th>Share</th><th>Vendor price</th><th>Profit</th><th>Incentive</th><th>Attach %</th></tr></thead><tbody>'+
-  St.map(o=>row(o.k,o)+`<td>${pct(tv_?o.v/tv_*100:null)}</td>`+ex3(o)+`<td>${pct(att(dm.get(norm(o.k))||0,mq.get(norm(o.k))||0))}</td></tr>`).join('')+'</tbody>';
+ const pk=multi?r=>r.ds.slice(0,7):r=>r.ds,pm=new Map(),pe=new Map();
+ rows.forEach(r=>{if(r.d>=p.s&&r.d<=p.e&&r.G=='mobile'&&(sf=='All'||r.staff==sf)&&(!HASBR||sb=='All'||r.branch==sb))pm.set(pk(r),(pm.get(pk(r))||0)+r.qty)});
+ dB.forEach(r=>pe.set(pk(r),(pe.get(pk(r))||0)+1));
+ $('sm_t').innerHTML=`<thead><tr><th>${multi?'Month':'Date'}</th><th>SMC</th><th>Attach %</th><th>Value</th><th>DE</th><th>CE</th><th>Vendor price</th><th>Profit</th><th>Incentive</th></tr></thead><tbody>`+
+  [{k:'Total',v:tv_,q:n,de:nc('DE'),ce:nc('CE'),vp,pf,si,at:att(dB.length,mob)},...Tm.map(o=>Object.assign(o,{at:att(pe.get(o.k)||0,pm.get(o.k)||0)}))].map((o,i)=>`<tr${i?'':' class="tot"'}><td>${i?lb(o.k):'Total'}</td><td>${fmt(o.q)}</td><td>${pct(o.at)}</td><td>${fmt(o.v)}</td><td>${fmt(o.de)}</td><td>${fmt(o.ce)}</td>`+ex3(o)+'</tr>').join('')+'</tbody>';
+ $('sm_s').innerHTML='<thead><tr><th>Staff</th><th>SMC</th><th>Attach %</th><th>Share (Qty)</th><th>Value</th><th>AVG</th><th>Share (Value)</th><th>Vendor price</th><th>Profit</th><th>Incentive</th></tr></thead><tbody>'+
+  St.map(o=>`<tr><td>${esc(o.k)}</td><td>${fmt(o.q)}</td><td>${pct(att(dm.get(norm(o.k))||0,mq.get(norm(o.k))||0))}</td><td>${pct(n?o.q/n*100:null)}</td><td>${fmt(o.v)}</td><td>${o.q?fmt(o.v/o.q):'—'}</td><td>${pct(tv_?o.v/tv_*100:null)}</td>`+ex3(o)+'</tr>').join('')+'</tbody>';
  $('sm_d').innerHTML='<thead><tr><th>Date</th><th>Staff</th><th>Brand</th><th>Item</th><th>Category</th><th>Amount</th><th>Vendor price</th><th>Profit</th><th>Incentive</th></tr></thead><tbody>'+
   d.slice().reverse().slice(0,300).map(r=>`<tr><td>${r.ds}</td><td>${esc(r.staff)}</td><td>${esc(r.brand)}</td><td style="text-align:left">${esc(r.item)}</td><td>${esc(r.cat)}</td><td>${fmt(r.v)}</td><td>${fmt(r.vp)}</td><td>${fmt(r.pf)}</td><td>${fmt(r.si)}</td></tr>`).join('')+'</tbody>'+(n>300?`<tfoot><tr><td colspan="9">Showing the latest 300 of ${n}</td></tr></tfoot>`:'');
  theme();const bar=(id,a,col)=>mk(id,{type:'bar',data:{labels:a.map(o=>o.k),datasets:[VQ(a,{backgroundColor:col,borderRadius:4})]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>inr(c.parsed.x)}}},scales:{x:{ticks:{callback:cmp}}}}});
@@ -669,7 +690,21 @@ function renderSmc(){
 const isSMC=a=>{const h=(a[0]||[]).map(norm);return h.includes('enquiry_no')||h.includes('imei_no')},isMG=a=>a.slice(0,6).some(r=>r.some(c=>norm(c)==='job count')),
  smcDone=()=>{if(rows.length)renderAll();else{renderSmc();renderMg()}};
 
-function renderAll(){renderTgt();renderGen();renderGr();renderBs();renderAt();renderDy();renderSmc();renderMg();bottom()}
+function renderCu(){
+ const p=rng('cu','cu_p');if(!p)return;
+ const f=[['staff','cu_staff'],['category','cu_cat'],['product','cu_prod'],['brand','cu_brand'],['itemcat','cu_ic'],['grp','cu_grp'],...(HASBR?[['branch','cu_br']]:[])],m=mval('cum'),mn=m=='v'?'Value':'Qty';
+ const d=rows.filter(r=>r.d>=p.s&&r.d<=p.e&&f.every(([k,id])=>$(id).value=='All'||r[k]==$(id).value)),M=new Map();
+ d.forEach(r=>{const k=norm(r.cust),o=M.get(k)||{k:r.cust,v:0,q:0,x:0,inv:new Set(),last:r.d,pb:{}};o.v+=r.amt;o.q+=r.qty;o.x+=r.disc;if(r.inv)o.inv.add(r.inv);if(r.d>o.last)o.last=r.d;if(r.pb)o.pb[r.pb]=(o.pb[r.pb]||0)+r.amt;M.set(k,o)});
+ const all=[...M.values()].sort((a,b)=>b[m]-a[m]),top=all.slice(0,20),TV=d.reduce((s,r)=>s+r.amt,0),TQ=d.reduce((s,r)=>s+r.qty,0),tv=top.reduce((s,o)=>s+o.v,0),tq=top.reduce((s,o)=>s+o.q,0);
+ $('cu_sub').textContent=`${p.l} · ${fmt(all.length)} customers · ranked by ${mn.toLowerCase()} · customers are grouped by name`;
+ $('cu_k').innerHTML=[['Customers',fmt(all.length)],['Total sales',inr(TV)],['Total qty',fmt(TQ)],['Top 20 value',inr(tv),pct(TV?tv/TV*100:null)+' of sales'],['Top 20 qty',fmt(tq),pct(TQ?tq/TQ*100:null)+' of qty']]
+  .map(([l,v,x])=>`<div class="kpi"><span>${l}</span><b>${v}</b>${x?`<small>${x}</small>`:''}</div>`).join('');
+ $('cu_t').innerHTML=`<thead><tr><th>#</th><th>Customer</th><th>Qty</th><th>Value</th><th>AVG</th><th>Discount</th><th>Discount %</th><th>Price band</th><th>Invoices</th><th>Last purchase</th><th>Share (${mn})</th></tr></thead><tbody>`+
+  top.map((o,i)=>{const pb=Object.entries(o.pb).sort((a,b)=>b[1]-a[1])[0],sh=(m=='v'?TV?o.v/TV:0:TQ?o.q/TQ:0)*100;
+   return `<tr><td>${i+1}</td><td style="text-align:left">${esc(o.k)}</td><td>${fmt(o.q)}</td><td>${fmt(o.v)}</td><td>${o.q?fmt(o.v/o.q):'—'}</td><td>${fmt(o.x)}</td><td>${o.v+o.x>0?pct(o.x/(o.v+o.x)*100):'—'}</td><td>${pb?esc(pb[0]):'—'}</td><td>${o.inv.size}</td><td>${iso(o.last)}</td><td style="background:linear-gradient(90deg,rgba(232,89,12,.25) ${Math.min(sh*4,100)}%,transparent ${Math.min(sh*4,100)}%)">${pct(sh)}</td></tr>`}).join('')+'</tbody>';
+ theme();mk('c_cu',{type:'bar',data:{labels:top.map(o=>o.k),datasets:[{label:mn,data:top.map(o=>o[m]),v:top.map(o=>o.v),q:top.map(o=>o.q),backgroundColor:COL[6],borderRadius:4}]},
+  options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>mn+': '+(m=='v'?inr(c.parsed.x):fmt(c.parsed.x))}}},scales:{x:{ticks:{callback:m=='v'?cmp:v=>v}},y:{ticks:{autoSkip:false}}}}})}
+function renderAll(){renderTgt();renderGen();renderGr();renderBs();renderAt();renderDy();renderCu();renderSmc();renderMg();bottom()}
 $('sfile').onchange=e=>{const f=e.target.files[0];if(f)readSheet(f,'dumb',(a,n,x)=>{
   if(isSMC(a)){if(loadSMC(a))smcDone();else alert('Could not read the exchange sheet.')}
   else if(isMG(a))loadMG(a);
@@ -680,7 +715,7 @@ $('tfile').onchange=e=>{const f=e.target.files[0];if(f)readSheet(f,'target',(a,n
 $('tview').onchange=()=>{buildPer();renderTgt()};
 $('tper').onchange=$('hide').onchange=renderTgt;
 $('rdate').onchange=()=>{buildPer();renderAll()};
-$('reset').onclick=()=>{FL.forEach(([k])=>$('f_'+k)&&($('f_'+k).value='All'));renderGen()};
+$('reset').onclick=()=>{FL.forEach(([k])=>$('f_'+k)&&($('f_'+k).value='All'));if($('sa_v')){$('sa_v').value='All';fillP('sa',['sa_p'],[0])}renderGen()};
 $('tg').onchange=()=>setTheme($('tg').checked,1);
 {let sv=null;try{sv=localStorage.getItem('sd_theme')}catch(e){}
  const mq=matchMedia('(prefers-color-scheme: dark)');setTheme(sv?sv=='dark':mq.matches,0);mq.addEventListener('change',e=>{let x=null;try{x=localStorage.getItem('sd_theme')}catch(_){}if(!x)setTheme(e.matches,0)})}
